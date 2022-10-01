@@ -19,7 +19,7 @@ namespace Filer
         /// <summary>
         /// ファイル名
         /// </summary>
-        public string Name => Info.Name;
+        public string Name => Parent ? ".." : Info.Name;
 
         /// <summary>
         /// 最終更新日時
@@ -46,6 +46,11 @@ namespace Filer
         /// ファイルが選択中?
         /// </summary>
         public ReactiveProperty<bool> IsSelected { get; set; } = new(false);
+
+        /// <summary>
+        /// 親ディレクトリへの参照?
+        /// </summary>
+        public bool Parent { get; set; } = false;
 
         /// <summary>
         /// コンストラクタ

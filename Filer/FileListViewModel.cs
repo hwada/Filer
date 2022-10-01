@@ -58,6 +58,12 @@ namespace Filer
             try
             {
                 var children = new List<FileItemViewModel>();
+                var current = new DirectoryInfo(dir);
+                if (current.Parent != null)
+                {
+                    children.Add(new FileItemViewModel(current.Parent.FullName) { Parent = true });
+                }
+
                 foreach (var item in Directory.EnumerateDirectories(dir))
                 {
                     children.Add(new FileItemViewModel(item));
