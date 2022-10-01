@@ -1,0 +1,67 @@
+﻿<UserControl
+    x:Class="Filer.FileList"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:local="clr-namespace:Filer"
+    xmlns:converter="clr-namespace:Filer.Converter"
+    mc:Ignorable="d">
+
+    <UserControl.DataContext>
+        <local:FileListViewModel/>
+    </UserControl.DataContext>
+
+    <UserControl.Resources>
+        <converter:VisibilityConverter x:Key="VisiblityConverter" />
+    </UserControl.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <TextBlock Grid.Row="0" Text="{Binding Path.Value}"/>
+        <ListBox Grid.Row="1"
+                 ItemsSource="{Binding Files, Mode=OneWay}"
+                 HorizontalContentAlignment="Stretch"
+                 SelectionMode="Single"
+                 SelectedItem="{Binding SelectedItem.Value, Mode=TwoWay}"
+                 PreviewKeyDown="ListBox_KeyDown">
+            <ListBox.ItemContainerStyle>
+                <Style TargetType="ListBoxItem">
+                    <Setter Property="IsSelected" Value="{Binding IsSelected.Value, Mode=TwoWay}" />
+                    <Setter Property="Template">
+                        <Setter.Value>
+                            <ControlTemplate TargetType="ListBoxItem">
+                                <ContentPresenter />
+                            </ControlTemplate>
+                        </Setter.Value>
+                    </Setter>
+                </Style>
+            </ListBox.ItemContainerStyle>
+            <ListBox.ItemTemplate>
+                <DataTemplate DataType="local:FileItemViewModel">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="2"/>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="100"/>
+                            <ColumnDefinition Width="150"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Row="0" Grid.Column="0" Text="{Binding Name}"/>
+                        <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding FileSize}" Margin="0,0,10,0"/>
+                        <TextBlock Grid.Row="0" Grid.Column="2" Text="{Binding LastWriteTime}"/>
+                        <Rectangle Grid.Row="1" Grid.ColumnSpan="3"
+                                   Visibility="{Binding IsSelected.Value, Mode=OneWay, Converter={StaticResource VisiblityConverter}}"
+                                   Stroke="Blue" Height="2" />
+                    </Grid>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+    </Grid>
+</UserControl>
