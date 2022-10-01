@@ -16,19 +16,22 @@
         <converter:VisibilityConverter x:Key="VisiblityConverter" />
     </UserControl.Resources>
 
-    <Border BorderBrush="Silver" BorderThickness="1">
+    <Border BorderBrush="Silver" BorderThickness="1"
+            Background="Black">
         <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
 
-            <TextBlock Grid.Row="0" Text="{Binding Path.Value}" Focusable="False" />
+            <TextBlock Grid.Row="0" Text="{Binding Path.Value}" Focusable="False" Foreground="White" />
             <Border Grid.Row="0" Height="1" VerticalAlignment="Bottom" BorderBrush="Silver" BorderThickness="1"/>
 
             <ListBox Grid.Row="1" Name="FileListBox"
                      ScrollViewer.HorizontalScrollBarVisibility="Hidden"
                      BorderBrush="{x:Null}"
+                     Background="Black"
+                     Foreground="White"
                      FocusVisualStyle="{x:Null}"
                      ItemsSource="{Binding Files, Mode=OneWay}"
                      HorizontalContentAlignment="Stretch"
