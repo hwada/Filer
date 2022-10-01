@@ -5,14 +5,15 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Filer"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
-    <Grid>
+        Title="Filer" Height="500" Width="800"
+        PreviewKeyDown="Window_PreviewKeyDown">
+    <Grid Focusable="False">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="0.5*"/>
             <ColumnDefinition Width="0.5*"/>
         </Grid.ColumnDefinitions>
 
-        <local:FileList Grid.Column="0"/>
-        <local:FileList Grid.Column="1"/>
+        <local:FileList x:Name="LeftPane" Grid.Column="0" />
+        <local:FileList x:Name="RightPane" Grid.Column="1" />
     </Grid>
 </Window>

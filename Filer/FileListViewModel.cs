@@ -80,6 +80,7 @@ namespace Filer
                 }
                 Files.Clear();
                 Files.AddRangeOnScheduler(children);
+                
                 SelectedItem.Value = children.First();
             }
             catch

@@ -16,72 +16,80 @@
         <converter:VisibilityConverter x:Key="VisiblityConverter" />
     </UserControl.Resources>
 
-    <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-        </Grid.RowDefinitions>
+    <Border BorderBrush="Silver" BorderThickness="1">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
 
-        <TextBlock Grid.Row="0" Text="{Binding Path.Value}"/>
-        <ListBox Grid.Row="1"
-                 ItemsSource="{Binding Files, Mode=OneWay}"
-                 HorizontalContentAlignment="Stretch"
-                 SelectionMode="Single"
-                 SelectedItem="{Binding SelectedItem.Value, Mode=TwoWay}"
-                 PreviewKeyDown="ListBox_KeyDown">
-            <ListBox.ItemContainerStyle>
-                <Style TargetType="ListBoxItem">
-                    <Setter Property="IsSelected" Value="{Binding IsSelected.Value, Mode=TwoWay}" />
-                    <Setter Property="Template">
-                        <Setter.Value>
-                            <ControlTemplate TargetType="ListBoxItem">
-                                <Grid>
-                                    <ContentPresenter />
-                                    <Border VerticalAlignment="Bottom"
+            <TextBlock Grid.Row="0" Text="{Binding Path.Value}" Focusable="False" />
+            <Border Grid.Row="0" Height="1" VerticalAlignment="Bottom" BorderBrush="Silver" BorderThickness="1"/>
+
+            <ListBox Grid.Row="1" Name="FileListBox"
+                     ScrollViewer.HorizontalScrollBarVisibility="Hidden"
+                     BorderBrush="{x:Null}"
+                     FocusVisualStyle="{x:Null}"
+                     ItemsSource="{Binding Files, Mode=OneWay}"
+                     HorizontalContentAlignment="Stretch"
+                     SelectionMode="Single"
+                     SelectedItem="{Binding SelectedItem.Value, Mode=TwoWay}"
+                     PreviewKeyDown="ListBox_KeyDown">
+                <ListBox.ItemContainerStyle>
+                    <Style TargetType="ListBoxItem">
+                        <Setter Property="IsSelected" Value="{Binding IsSelected.Value, Mode=TwoWay}" />
+                        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+                        <Setter Property="Template">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="ListBoxItem">
+                                    <Grid>
+                                        <ContentPresenter />
+                                        <Border VerticalAlignment="Bottom"
                                             BorderBrush="Blue" Height="2" BorderThickness="2">
-                                        <Border.Style>
-                                            <Style TargetType="Border">
-                                                <Style.Triggers>
-                                                    <MultiDataTrigger>
-                                                        <MultiDataTrigger.Conditions>
-                                                            <Condition Binding="{Binding Path=(Selector.IsSelectionActive), RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type ListBoxItem}}}" Value="True" />
-                                                            <Condition Binding="{Binding Path=IsSelected, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type ListBoxItem}}}" Value="True" />
-                                                        </MultiDataTrigger.Conditions>
-                                                        <Setter Property="Visibility" Value="Visible"/>
-                                                    </MultiDataTrigger>
-                                                    <DataTrigger Binding="{Binding Path=(Selector.IsSelectionActive), RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type ListBoxItem}}}" Value="False">
-                                                        <Setter Property="Visibility" Value="Collapsed"/>
-                                                    </DataTrigger>
-                                                    <DataTrigger Binding="{Binding Path=IsSelected, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type ListBoxItem}}}" Value="False">
-                                                        <Setter Property="Visibility" Value="Collapsed"/>
-                                                    </DataTrigger>
-                                                </Style.Triggers>
-                                            </Style>
-                                        </Border.Style>
-                                    </Border>
-                                </Grid>
-                            </ControlTemplate>
-                        </Setter.Value>
-                    </Setter>
-                </Style>
-            </ListBox.ItemContainerStyle>
-            <ListBox.ItemTemplate>
-                <DataTemplate DataType="local:FileItemViewModel">
-                    <Grid>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="*"/>
-                        </Grid.RowDefinitions>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="100"/>
-                            <ColumnDefinition Width="150"/>
-                        </Grid.ColumnDefinitions>
-                        <TextBlock Grid.Row="0" Grid.Column="0" Text="{Binding Name}"/>
-                        <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding FileSize}" Margin="0,0,10,0"/>
-                        <TextBlock Grid.Row="0" Grid.Column="2" Text="{Binding LastWriteTime}"/>
-                    </Grid>
-                </DataTemplate>
-            </ListBox.ItemTemplate>
-        </ListBox>
-    </Grid>
+                                            <Border.Style>
+                                                <Style TargetType="Border">
+                                                    <Style.Triggers>
+                                                        <MultiDataTrigger>
+                                                            <MultiDataTrigger.Conditions>
+                                                                <Condition Binding="{Binding Path=(Selector.IsSelectionActive), RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type ListBoxItem}}}" Value="True" />
+                                                                <Condition Binding="{Binding Path=IsSelected, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type ListBoxItem}}}" Value="True" />
+                                                            </MultiDataTrigger.Conditions>
+                                                            <Setter Property="Visibility" Value="Visible"/>
+                                                        </MultiDataTrigger>
+                                                        <DataTrigger Binding="{Binding Path=(Selector.IsSelectionActive), RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type ListBoxItem}}}" Value="False">
+                                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding Path=IsSelected, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type ListBoxItem}}}" Value="False">
+                                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Border.Style>
+                                        </Border>
+                                    </Grid>
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                </ListBox.ItemContainerStyle>
+                <ListBox.ItemTemplate>
+                    <DataTemplate DataType="local:FileItemViewModel">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="100"/>
+                                <ColumnDefinition Width="150"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Row="0" Grid.Column="0" Text="{Binding Name}" TextTrimming="CharacterEllipsis"/>
+                            <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding FileSize}" Margin="0,0,10,0"/>
+                            <TextBlock Grid.Row="0" Grid.Column="2" Text="{Binding LastWriteTime}"/>
+                        </Grid>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+        </Grid>
+    </Border>
 </UserControl>

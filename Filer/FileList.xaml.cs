@@ -34,5 +34,13 @@ namespace Filer
                 vm.OnKeyDown(e);
             }
         }
+
+        /// <summary>
+        /// ファイルリストにフォーカスを持たせる
+        /// </summary>
+        public void Activate()
+        {
+            FileListBox.Focus();
+        }
     }
 }
