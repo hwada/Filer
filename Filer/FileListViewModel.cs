@@ -36,17 +36,19 @@ namespace Filer
         public ReactiveProperty<FileItemViewModel> SelectedItem { get; set; } = new();
 
         /// <summary>
+        /// 選択行
+        /// </summary>
+        public ReactiveProperty<int> SelectedIndex { get; set; } = new(-1);
+
+        /// <summary>
         /// コンストラクタ
         /// </summary>
         public FileListViewModel()
         {
-            // TODO: 前回のフォルダを覚える
-            //MoveDirectory(Directory.GetCurrentDirectory());
-            MoveDirectory(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments));
-
             Files.AddTo(_disposables);
             SelectedItem.AddTo(_disposables);
 
+            // Path.Value = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
         }
 
         /// <summary>
@@ -71,6 +73,7 @@ namespace Filer
                         if (SelectedItem.Value.Info is DirectoryInfo info)
                         {
                             MoveDirectory(info.FullName);
+                            e.Handled = true;
                         }
                     }
                     break;
@@ -79,7 +82,22 @@ namespace Filer
                     if (current.Parent != null)
                     {
                         MoveDirectory(current.Parent.FullName);
+                        e.Handled = true;
                     }
+                    break;
+                case Key.Up:
+                    if (SelectedIndex.Value > 0)
+                    {
+                        SelectedIndex.Value -= 1;
+                    }
+                    e.Handled = true;
+                    break;
+                case Key.Down:
+                    if (SelectedIndex.Value < Files.Count - 1)
+                    {
+                        SelectedIndex.Value += 1;
+                    }
+                    e.Handled = true;
                     break;
             }
         }
@@ -88,7 +106,7 @@ namespace Filer
         /// ディレクトリを移動する
         /// </summary>
         /// <param name="dir">移動先のディレクトリ</param>
-        private void MoveDirectory(string dir)
+        public void MoveDirectory(string dir)
         {
             try
             {
@@ -108,14 +126,18 @@ namespace Filer
                 {
                     children.Add(new FileItemViewModel(item));
                 }
-                Path.Value = dir;
 
+                Path.Value = dir;
                 foreach (var item in Files)
                 {
                     item.Dispose();
                 }
                 Files.Clear();
-                Files.AddRangeOnScheduler(children);
+                // Files.AddRangeOnScheduler(children);
+                foreach (var item in children)
+                {
+                    Files.Add(item);
+                }
 
                 var prev = children.FirstOrDefault(x => x.Info.FullName == previousDir);
                 if (prev != null)
@@ -126,6 +148,7 @@ namespace Filer
                 {
                     SelectedItem.Value = children.First();
                 }
+                SelectedIndex.Value = children.IndexOf(SelectedItem.Value);
             }
             catch
             {

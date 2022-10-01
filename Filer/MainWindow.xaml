@@ -6,6 +6,7 @@
         xmlns:local="clr-namespace:Filer"
         mc:Ignorable="d"
         Title="Filer" Height="500" Width="800"
+        Closed="Window_Closed"
         PreviewKeyDown="Window_PreviewKeyDown">
     <Grid Focusable="False">
         <Grid.ColumnDefinitions>

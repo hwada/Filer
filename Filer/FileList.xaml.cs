@@ -22,6 +22,11 @@ namespace Filer
         }
 
         /// <summary>
+        /// VMを取得する
+        /// </summary>
+        internal FileListViewModel ViewModel => (FileListViewModel)DataContext;
+
+        /// <summary>
         /// キーダウンイベント
         /// </summary>
         /// <param name="sender">イベント送信元オブジェクト</param>
@@ -29,10 +34,7 @@ namespace Filer
         private void ListBox_KeyDown(object sender, KeyEventArgs e)
         {
             //TODO: コードビハインド書かずにやりくりする
-            if (DataContext is FileListViewModel vm)
-            {
-                vm.OnKeyDown(e);
-            }
+            ViewModel.OnKeyDown(e);
         }
 
         /// <summary>

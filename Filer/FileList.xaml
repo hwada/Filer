@@ -29,6 +29,9 @@
 
             <ListBox Grid.Row="1" Name="FileListBox"
                      ScrollViewer.HorizontalScrollBarVisibility="Hidden"
+                     VirtualizingPanel.IsVirtualizing="True"
+                     VirtualizingPanel.VirtualizationMode="Recycling"
+                     VirtualizingPanel.ScrollUnit="Pixel"
                      BorderBrush="{x:Null}"
                      Background="Black"
                      Foreground="White"
@@ -37,6 +40,7 @@
                      HorizontalContentAlignment="Stretch"
                      SelectionMode="Single"
                      SelectedItem="{Binding SelectedItem.Value, Mode=TwoWay}"
+                     SelectedIndex="{Binding SelectedIndex.Value, Mode=TwoWay}"
                      PreviewKeyDown="ListBox_KeyDown">
                 <ListBox.ItemContainerStyle>
                     <Style TargetType="ListBoxItem">
