@@ -26,10 +26,18 @@ namespace Filer
         /// <summary>
         /// VMを取得する
         /// </summary>
-        internal FileListViewModel ViewModel => (FileListViewModel)DataContext;
+        public FileListViewModel ViewModel => (FileListViewModel)DataContext;
 
         /// <summary>
-        /// キーダウンイベント
+        /// ファイルリストにフォーカスを持たせる
+        /// </summary>
+        public void Activate()
+        {
+            FileListBox.Focus();
+        }
+
+        /// <summary>
+        /// リストボックス上でのキーダウンイベント
         /// </summary>
         /// <param name="sender">イベント送信元オブジェクト</param>
         /// <param name="e">イベント引数</param>
@@ -54,17 +62,54 @@ namespace Filer
                     }
                     e.Handled = true;
                     return;
+                case Key.Escape:
+                    ViewModel.IsSearchMode.Value = false;
+                    ViewModel.SearchText.Value = "";
+                    FileListBox.Focus();
+                    e.Handled = true;
+                    return;
+                case Key.F:
+                    ViewModel.IsSearchMode.Value = true;
+                    SearchTextBox.Focus();
+                    e.Handled = true;
+                    return;
             }
 
             ViewModel.OnKeyDown(e);
         }
 
         /// <summary>
-        /// ファイルリストにフォーカスを持たせる
+        /// 検索ボックス上でのキーダウンイベント
         /// </summary>
-        public void Activate()
+        /// <param name="sender">イベント送信元オブジェクト</param>
+        /// <param name="e">イベント引数</param>
+        private void SearchTextBox_PreviewKeyDown(object sender, KeyEventArgs e)
         {
-            FileListBox.Focus();
+            switch (e.Key)
+            {
+                case Key.Escape:
+                case Key.Enter:
+                    ViewModel.IsSearchMode.Value = false;
+                    ViewModel.SearchText.Value = "";
+                    e.Handled = true;
+                    break;
+                case Key.Up:
+                    ViewModel.OnKeyDown(e);
+                    break;
+                case Key.Down:
+                    ViewModel.OnKeyDown(e);
+                    break;
+            }
+        }
+
+        /// <summary>
+        /// リストボックスにフォーカスがきたとき
+        /// </summary>
+        /// <param name="sender">イベント送信元オブジェクト</param>
+        /// <param name="e">イベント引数</param>
+        private void FileListBox_GotFocus(object sender, RoutedEventArgs e)
+        {
+            ViewModel.IsActive.Value = true;
         }
     }
 }

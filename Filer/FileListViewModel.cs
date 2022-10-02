@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Reactive.Bindings;
 using System.Reactive.Linq;
 using System.IO;
@@ -10,21 +8,31 @@ using System.Reactive.Disposables;
 using System.Windows.Input;
 using Prism.Mvvm;
 using Reactive.Bindings.Extensions;
-using System.ComponentModel.DataAnnotations;
 
 namespace Filer
 {
     /// <summary>
     /// ファイルリストペインのVM
     /// </summary>
-    internal class FileListViewModel : BindableBase, IDisposable
+    public class FileListViewModel : BindableBase, IDisposable
     {
         private CompositeDisposable _disposables = new();
+        private List<FileItemViewModel> _files = new();
 
         /// <summary>
         /// 現在位置
         /// </summary>
         public ReactiveProperty<string> Path { get; set; } = new("");
+
+        /// <summary>
+        /// このペインのステータス
+        /// </summary>
+        public ReactiveProperty<string> Footer { get; set; } = new("");
+
+        /// <summary>
+        /// このペインがフォーカスを持っているかどうか
+        /// </summary>
+        public ReactiveProperty<bool> IsActive { get; set; } = new(false);
 
         /// <summary>
         /// 現在のディレクトリ下にあるディレクトリとファイルのリスト
@@ -42,12 +50,24 @@ namespace Filer
         public ReactiveProperty<int> SelectedIndex { get; set; } = new(-1);
 
         /// <summary>
+        /// 検索モードかどうか
+        /// </summary>
+        public ReactiveProperty<bool> IsSearchMode { get; set; } = new(false);
+
+        /// <summary>
+        /// 検索文字列
+        /// </summary>
+        public ReactiveProperty<string> SearchText { get; set; } = new("");
+
+        /// <summary>
         /// コンストラクタ
         /// </summary>
         public FileListViewModel()
         {
             Files.AddTo(_disposables);
             SelectedItem.AddTo(_disposables);
+            IsSearchMode.AddTo(_disposables);
+            SearchText.Subscribe(OnSearchText).AddTo(_disposables);
 
             // Path.Value = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
         }
@@ -57,6 +77,10 @@ namespace Filer
         /// </summary>
         public void Dispose()
         {
+            foreach (var item in _files)
+            {
+                item.Dispose();
+            }
             _disposables.Dispose();
         }
 
@@ -134,13 +158,12 @@ namespace Filer
                     item.Dispose();
                 }
                 Files.Clear();
-                // Files.AddRangeOnScheduler(children);
-                foreach (var item in children)
-                {
-                    Files.Add(item);
-                }
+                Files.AddRangeOnScheduler(children);
+
+                ResetItems(children);
 
                 HistoryRepository.Instance.Add(dir);
+                UpdateFooter();
 
                 var prev = children.FirstOrDefault(x => x.Info.FullName == previousDir);
                 if (prev != null)
@@ -155,6 +178,51 @@ namespace Filer
             }
             catch
             {
+            }
+        }
+
+        /// <summary>
+        /// ファイルリストを更新する
+        /// </summary>
+        /// <param name="items">新しいディレクトリのファイルリスト</param>
+        private void ResetItems(List<FileItemViewModel> items)
+        {
+            foreach (var item in _files)
+            {
+                item.Dispose();
+            }
+
+            _files.Clear();
+            _files.AddRange(items);
+        }
+
+        /// <summary>
+        /// ステータス情報を更新する
+        /// </summary>
+        private void UpdateFooter()
+        {
+            var drive = new DriveInfo(System.IO.Path.GetPathRoot(Path.Value) ?? "C");
+            if (drive.IsReady)
+            {
+                Footer.Value = $"{Util.GetFileSize(drive.AvailableFreeSpace)} / {Util.GetFileSize(drive.TotalSize)}";
+            }
+            else
+            {
+                Footer.Value = $"";
+            }
+        }
+
+        /// <summary>
+        /// ファイルリストの絞り込みを行う
+        /// </summary>
+        /// <param name="text">検索文字列</param>
+        private void OnSearchText(string text)
+        {
+            var words = text.Split(" ").Where(x => x.Length > 0).Select(x => x.ToLower()).ToArray();
+            Files.Clear();
+            foreach (var item in _files.Where(x => words.All(w => x.Name.ToLower().Contains(w))))
+            {
+                Files.Add(item);
             }
         }
     }

@@ -1,5 +1,9 @@
-﻿using System;
+﻿using Microsoft.Xaml.Behaviors.Media;
+using Reactive.Bindings.Extensions;
+using System;
 using System.IO;
+using System.Reactive.Disposables;
+using System.Reactive.Linq;
 using System.Windows;
 using System.Windows.Input;
 
@@ -10,6 +14,8 @@ namespace Filer
     /// </summary>
     public partial class MainWindow : Window
     {
+        private CompositeDisposable _disposables = new();
+
         /// <summary>
         /// コンストラクタ
         /// </summary>
@@ -22,23 +28,20 @@ namespace Filer
             Width = Settings.Default.WindowWidth;
             Height = Settings.Default.WindowHeight;
 
-            if (Directory.Exists(Settings.Default.LeftDirectory))
-            {
-                LeftPaneViewModel.MoveDirectory(Settings.Default.LeftDirectory);
-            }
-            else
-            {
-                LeftPaneViewModel.MoveDirectory(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments));
-            }
+            LeftPaneViewModel.MoveDirectory(GetDirectory(Settings.Default.LeftDirectory));
+            RightPaneViewModel.MoveDirectory(GetDirectory(Settings.Default.RightDirectory));
 
-            if (Directory.Exists(Settings.Default.RightDirectory))
-            {
-                RightPaneViewModel.MoveDirectory(Settings.Default.RightDirectory);
-            }
-            else
-            {
-                RightPaneViewModel.MoveDirectory(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments));
-            }
+            // 一方がアクティブになったら他方のフォーカスを外す(実装が雑)
+            LeftPaneViewModel.IsActive.Where(x => x).Subscribe(_ => { RightPaneViewModel.IsActive.Value = false; }).AddTo(_disposables);
+            RightPaneViewModel.IsActive.Where(x => x).Subscribe(_ => { LeftPaneViewModel.IsActive.Value = false; }).AddTo(_disposables);
+        }
+
+        /// <summary>
+        /// 引数のdirが存在しなければMyDocumentのパスを返す
+        /// </summary>
+        private static string GetDirectory(string dir)
+        {
+            return Directory.Exists(dir) ? dir : Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
         }
 
         /// <summary>
@@ -98,6 +101,8 @@ namespace Filer
             Settings.Default.LeftDirectory = LeftPaneViewModel.Path.Value;
             Settings.Default.RightDirectory = RightPaneViewModel.Path.Value;
             Settings.Default.Save();
+
+            _disposables.Dispose();
         }
     }
 }

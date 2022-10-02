@@ -21,6 +21,7 @@
         <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
                 <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
 
@@ -41,6 +42,7 @@
                      SelectionMode="Single"
                      SelectedItem="{Binding SelectedItem.Value, Mode=TwoWay}"
                      SelectedIndex="{Binding SelectedIndex.Value, Mode=TwoWay}"
+                     GotFocus="FileListBox_GotFocus"
                      PreviewKeyDown="ListBox_KeyDown">
                 <ListBox.ItemContainerStyle>
                     <Style TargetType="ListBoxItem">
@@ -58,12 +60,12 @@
                                                     <Style.Triggers>
                                                         <MultiDataTrigger>
                                                             <MultiDataTrigger.Conditions>
-                                                                <Condition Binding="{Binding Path=(Selector.IsSelectionActive), RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type ListBoxItem}}}" Value="True" />
+                                                                <Condition Binding="{Binding Path=ViewModel.IsActive.Value, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type local:FileList}}}" Value="True" />
                                                                 <Condition Binding="{Binding Path=IsSelected, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type ListBoxItem}}}" Value="True" />
                                                             </MultiDataTrigger.Conditions>
                                                             <Setter Property="Visibility" Value="Visible"/>
                                                         </MultiDataTrigger>
-                                                        <DataTrigger Binding="{Binding Path=(Selector.IsSelectionActive), RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type ListBoxItem}}}" Value="False">
+                                                        <DataTrigger Binding="{Binding Path=ViewModel.IsActive.Value, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type local:FileList}}}" Value="False">
                                                             <Setter Property="Visibility" Value="Collapsed"/>
                                                         </DataTrigger>
                                                         <DataTrigger Binding="{Binding Path=IsSelected, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type ListBoxItem}}}" Value="False">
@@ -97,6 +99,36 @@
                     </DataTemplate>
                 </ListBox.ItemTemplate>
             </ListBox>
+
+            <Border Grid.Row="2" Height="1" VerticalAlignment="Top" BorderBrush="Silver" BorderThickness="1"/>
+            <TextBlock Grid.Row="2" Text="{Binding Footer.Value}" Focusable="False" Foreground="White">
+                <TextBlock.Style>
+                    <Style TargetType="TextBlock">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsSearchMode.Value}" Value="True">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding IsSearchMode.Value}" Value="False">
+                                <Setter Property="Visibility" Value="Visible"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </TextBlock.Style>
+            </TextBlock>
+            <TextBox Grid.Row="2" Text="{Binding SearchText.Value, UpdateSourceTrigger=PropertyChanged}" Name="SearchTextBox" PreviewKeyDown="SearchTextBox_PreviewKeyDown">
+                <TextBox.Style>
+                    <Style TargetType="TextBox">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsSearchMode.Value}" Value="False">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding IsSearchMode.Value}" Value="True">
+                                <Setter Property="Visibility" Value="Visible"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </TextBox.Style>
+            </TextBox>
         </Grid>
     </Border>
 </UserControl>

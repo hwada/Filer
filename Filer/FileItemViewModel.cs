@@ -7,7 +7,10 @@ using Reactive.Bindings.Extensions;
 
 namespace Filer
 {
-    class FileItemViewModel : BindableBase, IDisposable
+    /// <summary>
+    /// ファイル情報
+    /// </summary>
+    public class FileItemViewModel : BindableBase, IDisposable
     {
         private CompositeDisposable _disposables = new();
 
@@ -38,7 +41,7 @@ namespace Filer
                 {
                     return "<DIR>";
                 }
-                return ((FileInfo)Info).Length.ToString();
+                return Util.GetFileSize(((FileInfo)Info).Length);
             }
         }
 
