@@ -89,6 +89,8 @@ namespace Filer
         /// <param name="e">イベント引数</param>
         private void Window_Closed(object sender, EventArgs e)
         {
+            HistoryRepository.Instance.Save();
+
             Settings.Default.WindowLeft = (int)Left;
             Settings.Default.WindowTop = (int)Top;
             Settings.Default.WindowWidth = (int)Width;

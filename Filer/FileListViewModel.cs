@@ -10,6 +10,7 @@ using System.Reactive.Disposables;
 using System.Windows.Input;
 using Prism.Mvvm;
 using Reactive.Bindings.Extensions;
+using System.ComponentModel.DataAnnotations;
 
 namespace Filer
 {
@@ -138,6 +139,8 @@ namespace Filer
                 {
                     Files.Add(item);
                 }
+
+                HistoryRepository.Instance.Add(dir);
 
                 var prev = children.FirstOrDefault(x => x.Info.FullName == previousDir);
                 if (prev != null)
