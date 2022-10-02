@@ -8,6 +8,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="WinAPI\Shell\**" />
+    <EmbeddedResource Remove="WinAPI\Shell\**" />
+    <None Remove="WinAPI\Shell\**" />
+    <Page Remove="WinAPI\Shell\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Folder Include="Converter\" />
   </ItemGroup>
 
