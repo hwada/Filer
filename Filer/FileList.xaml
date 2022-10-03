@@ -52,6 +52,16 @@
                             <Setter.Value>
                                 <ControlTemplate TargetType="ListBoxItem">
                                     <Grid>
+                                        <Grid.Style>
+                                            <Style TargetType="Grid">
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding Path=IsMarked.Value}" Value="True">
+                                                        <Setter Property="Background" Value="LightBlue"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Grid.Style>
+                                        
                                         <ContentPresenter />
                                         <Border VerticalAlignment="Bottom"
                                             BorderBrush="Blue" Height="2" BorderThickness="2">

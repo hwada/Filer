@@ -51,6 +51,11 @@ namespace Filer
         public ReactiveProperty<bool> IsSelected { get; set; } = new(false);
 
         /// <summary>
+        /// ファイルにマーキングされている?
+        /// </summary>
+        public ReactiveProperty<bool> IsMarked { get; set; } = new(false);
+
+        /// <summary>
         /// 親ディレクトリへの参照?
         /// </summary>
         public bool Parent { get; set; } = false;

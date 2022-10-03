@@ -90,6 +90,7 @@ namespace Filer
         /// <param name="e">押下されたキー</param>
         public void OnKeyDown(KeyEventArgs e)
         {
+            // InputBindingを使っていないのはキーバインドを変更できるようにしたい、と少しだけ考えているため
             switch (e.Key)
             {
                 case Key.Enter:
@@ -121,6 +122,24 @@ namespace Filer
                     if (SelectedIndex.Value < Files.Count - 1)
                     {
                         SelectedIndex.Value += 1;
+                    }
+                    e.Handled = true;
+                    break;
+                case Key.Space:
+                    if (SelectedItem.Value != null)
+                    {
+                        SelectedItem.Value.IsMarked.Value = !SelectedItem.Value.IsMarked.Value;
+                    }
+                    if (SelectedIndex.Value < Files.Count - 1)
+                    {
+                        SelectedIndex.Value += 1;
+                    }
+                    e.Handled = true;
+                    break;
+                case Key.A:
+                    foreach (var item in Files)
+                    {
+                        item.IsMarked.Value = !item.IsMarked.Value;
                     }
                     e.Handled = true;
                     break;
