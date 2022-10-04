@@ -81,9 +81,25 @@ namespace Filer
                     ShowContextMenu();
                     e.Handled = true;
                     return;
+                case Key.K:
+                    CreateNewDirectory();
+                    e.Handled = true;
+                    break;
             }
 
             ViewModel.OnKeyDown(e);
+        }
+
+        /// <summary>
+        /// 新しいディレクトリを作成する
+        /// </summary>
+        private void CreateNewDirectory()
+        {
+            var window = new InputBox { Owner = Window.GetWindow(this) };
+            if (window.ShowDialog() == true)
+            {
+                ViewModel.CreateNewDirectory(window.InputText);
+            }
         }
 
         /// <summary>

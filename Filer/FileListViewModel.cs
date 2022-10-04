@@ -163,6 +163,26 @@ namespace Filer
         }
 
         /// <summary>
+        /// 新しいディレクトリを作成する
+        /// </summary>
+        /// <param name="directory">ディレクトリ名</param>
+        public void CreateNewDirectory(string directory)
+        {
+            if (directory.Length == 0)
+            {
+                return;
+            }
+            var fullPath = System.IO.Path.Combine(Path.Value, directory);
+            if (Directory.Exists(fullPath))
+            {
+                return;
+            }
+
+            Directory.CreateDirectory(fullPath);
+            MoveDirectory(fullPath);
+        }
+
+        /// <summary>
         /// ディレクトリを移動する
         /// </summary>
         /// <param name="dir">移動先のディレクトリ</param>
