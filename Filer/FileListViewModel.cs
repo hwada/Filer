@@ -20,6 +20,11 @@ namespace Filer
         private List<FileItemViewModel> _files = new();
 
         /// <summary>
+        /// 隣のペイン
+        /// </summary>
+        public FileListViewModel NextPane { get; set; }
+
+        /// <summary>
         /// 現在位置
         /// </summary>
         public ReactiveProperty<string> Path { get; set; } = new("");
@@ -62,12 +67,19 @@ namespace Filer
         /// <summary>
         /// コンストラクタ
         /// </summary>
+#pragma warning disable CS8618 // null 非許容のフィールドには、コンストラクターの終了時に null 以外の値が入っていなければなりません。Null 許容として宣言することをご検討ください。
         public FileListViewModel()
+#pragma warning restore CS8618 // null 非許容のフィールドには、コンストラクターの終了時に null 以外の値が入っていなければなりません。Null 許容として宣言することをご検討ください。
         {
             Files.AddTo(_disposables);
             SelectedItem.AddTo(_disposables);
             IsSearchMode.AddTo(_disposables);
             SearchText.Subscribe(OnSearchText).AddTo(_disposables);
+
+            IsActive.Where(x => x).Subscribe(_ =>
+            {
+                NextPane.IsActive.Value = false;
+            }).AddTo(_disposables);
 
             // Path.Value = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
         }
@@ -141,6 +153,10 @@ namespace Filer
                     {
                         item.IsMarked.Value = !item.IsMarked.Value;
                     }
+                    e.Handled = true;
+                    break;
+                case Key.O:
+                    MoveDirectory(NextPane.Path.Value);
                     e.Handled = true;
                     break;
             }

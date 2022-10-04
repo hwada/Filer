@@ -31,9 +31,8 @@ namespace Filer
             LeftPaneViewModel.MoveDirectory(GetDirectory(Settings.Default.LeftDirectory));
             RightPaneViewModel.MoveDirectory(GetDirectory(Settings.Default.RightDirectory));
 
-            // 一方がアクティブになったら他方のフォーカスを外す(実装が雑)
-            LeftPaneViewModel.IsActive.Where(x => x).Subscribe(_ => { RightPaneViewModel.IsActive.Value = false; }).AddTo(_disposables);
-            RightPaneViewModel.IsActive.Where(x => x).Subscribe(_ => { LeftPaneViewModel.IsActive.Value = false; }).AddTo(_disposables);
+            LeftPaneViewModel.NextPane = RightPaneViewModel;
+            RightPaneViewModel.NextPane = LeftPaneViewModel;
         }
 
         /// <summary>
