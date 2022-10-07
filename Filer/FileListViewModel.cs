@@ -8,6 +8,7 @@ using System.Reactive.Disposables;
 using System.Windows.Input;
 using Prism.Mvvm;
 using Reactive.Bindings.Extensions;
+using System.Windows.Threading;
 
 namespace Filer
 {
@@ -18,6 +19,7 @@ namespace Filer
     {
         private CompositeDisposable _disposables = new();
         private List<FileItemViewModel> _files = new();
+        private FileSystemWatcher _watcher = new(@"C:\");
 
         /// <summary>
         /// 隣のペイン
@@ -27,7 +29,7 @@ namespace Filer
         /// <summary>
         /// 現在位置
         /// </summary>
-        public ReactiveProperty<string> Path { get; set; } = new("");
+        public ReactiveProperty<string> FullPath { get; set; } = new("");
 
         /// <summary>
         /// このペインのステータス
@@ -81,7 +83,13 @@ namespace Filer
                 NextPane.IsActive.Value = false;
             }).AddTo(_disposables);
 
-            // Path.Value = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+            _watcher.NotifyFilter = NotifyFilters.FileName | NotifyFilters.Size;
+            _watcher.Created += OnDirectoryUpdated;
+            _watcher.Changed += OnDirectoryUpdated;
+            _watcher.Deleted += OnDirectoryUpdated;
+            _watcher.IncludeSubdirectories = false;
+            _watcher.EnableRaisingEvents = true;
+            _watcher.Filter = "*";
         }
 
         /// <summary>
@@ -116,7 +124,7 @@ namespace Filer
                     }
                     break;
                 case Key.Back:
-                    var current = new DirectoryInfo(Path.Value);
+                    var current = new DirectoryInfo(FullPath.Value);
                     if (current.Parent != null)
                     {
                         MoveDirectory(current.Parent.FullName);
@@ -156,9 +164,40 @@ namespace Filer
                     e.Handled = true;
                     break;
                 case Key.O:
-                    MoveDirectory(NextPane.Path.Value);
+                    MoveDirectory(NextPane.FullPath.Value);
                     e.Handled = true;
                     break;
+                case Key.C:
+                    CopyItems();
+                    e.Handled = true;
+                    break;
+            }
+        }
+
+        /// <summary>
+        /// 隣接ペインに選択したアイテムをコピーする
+        /// </summary>
+        private void CopyItems()
+        {
+            foreach (var item in Files.Where(x => x.IsMarked.Value))
+            {
+                NextPane.CopyFrom(item);
+            }
+        }
+
+        /// <summary>
+        /// 現在のディレクトリにitemをコピーします
+        /// </summary>
+        /// <param name="item">コピー元のアイテム</param>
+        public void CopyFrom(FileItemViewModel item)
+        {
+            if (item.Info is FileInfo fileInfo)
+            {
+                Util.CopyFile(fileInfo.FullName, Path.Combine(FullPath.Value, fileInfo.Name));
+            }
+            else if (item.Info is DirectoryInfo directoryInfo)
+            {
+                Util.CopyDirectory(directoryInfo.FullName, FullPath.Value, true);
             }
         }
 
@@ -172,7 +211,7 @@ namespace Filer
             {
                 return;
             }
-            var fullPath = System.IO.Path.Combine(Path.Value, directory);
+            var fullPath = System.IO.Path.Combine(FullPath.Value, directory);
             if (Directory.Exists(fullPath))
             {
                 return;
@@ -190,50 +229,60 @@ namespace Filer
         {
             try
             {
-                var previousDir = Path.Value;
-                var children = new List<FileItemViewModel>();
-                var current = new DirectoryInfo(dir);
-                if (current.Parent != null)
-                {
-                    children.Add(new FileItemViewModel(current.Parent.FullName) { Parent = true });
-                }
+                var previousDir = FullPath.Value;
 
-                foreach (var item in Directory.EnumerateDirectories(dir))
-                {
-                    children.Add(new FileItemViewModel(item));
-                }
-                foreach (var item in Directory.EnumerateFiles(dir))
-                {
-                    children.Add(new FileItemViewModel(item));
-                }
-
-                Path.Value = dir;
-                foreach (var item in Files)
-                {
-                    item.Dispose();
-                }
-                Files.Clear();
-                Files.AddRangeOnScheduler(children);
-
-                ResetItems(children);
+                UpdateItems(dir);
+                FullPath.Value = dir;
+                _watcher.Path = dir;
 
                 HistoryRepository.Instance.Add(dir);
                 UpdateFooter();
 
-                var prev = children.FirstOrDefault(x => x.Info.FullName == previousDir);
+                var prev = Files.FirstOrDefault(x => x.Info.FullName == previousDir);
                 if (prev != null)
                 {
                     SelectedItem.Value = prev;
                 }
-                else if (children.Count > 0)
+                else if (Files.Count > 0)
                 {
-                    SelectedItem.Value = children.First();
+                    SelectedItem.Value = Files.First();
                 }
-                SelectedIndex.Value = children.IndexOf(SelectedItem.Value);
+                SelectedIndex.Value = Files.IndexOf(SelectedItem.Value);
             }
             catch
             {
             }
+        }
+
+        /// <summary>
+        /// 指定ディレクトリ以下のアイテムを取得する
+        /// </summary>
+        /// <param name="dir">ディレクトリパス</param>
+        private void UpdateItems(string dir)
+        {
+            var children = new List<FileItemViewModel>();
+            var current = new DirectoryInfo(dir);
+            if (current.Parent != null)
+            {
+                children.Add(new FileItemViewModel(current.Parent.FullName) { Parent = true });
+            }
+
+            foreach (var item in Directory.EnumerateDirectories(dir))
+            {
+                children.Add(new FileItemViewModel(item));
+            }
+            foreach (var item in Directory.EnumerateFiles(dir))
+            {
+                children.Add(new FileItemViewModel(item));
+            }
+
+            foreach (var item in Files)
+            {
+                item.Dispose();
+            }
+            Files.ClearOnScheduler();
+            Files.AddRangeOnScheduler(children);
+            ResetItems(children);
         }
 
         /// <summary>
@@ -256,7 +305,7 @@ namespace Filer
         /// </summary>
         private void UpdateFooter()
         {
-            var drive = new DriveInfo(System.IO.Path.GetPathRoot(Path.Value) ?? "C");
+            var drive = new DriveInfo(System.IO.Path.GetPathRoot(FullPath.Value) ?? "C");
             if (drive.IsReady)
             {
                 Footer.Value = $"{Util.GetFileSize(drive.AvailableFreeSpace)} / {Util.GetFileSize(drive.TotalSize)}";
@@ -279,6 +328,17 @@ namespace Filer
             {
                 Files.Add(item);
             }
+        }
+
+        /// <summary>
+        /// フォルダ内の更新イベント
+        /// </summary>
+        /// <param name="sender">イベント送信元オブジェクト</param>
+        /// <param name="e">イベント引数</param>
+        private void OnDirectoryUpdated(object sender, FileSystemEventArgs e)
+        {
+            //App.Current.MainWindow.Dispatcher.BeginInvoke(() => UpdateItems(FullPath.Value));
+            UpdateItems(FullPath.Value);
         }
     }
 }

@@ -97,8 +97,8 @@ namespace Filer
             Settings.Default.WindowTop = (int)Top;
             Settings.Default.WindowWidth = (int)Width;
             Settings.Default.WindowHeight = (int)Height;
-            Settings.Default.LeftDirectory = LeftPaneViewModel.Path.Value;
-            Settings.Default.RightDirectory = RightPaneViewModel.Path.Value;
+            Settings.Default.LeftDirectory = LeftPaneViewModel.FullPath.Value;
+            Settings.Default.RightDirectory = RightPaneViewModel.FullPath.Value;
             Settings.Default.Save();
 
             _disposables.Dispose();

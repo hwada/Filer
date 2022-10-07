@@ -25,7 +25,7 @@
                 <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
 
-            <TextBlock Grid.Row="0" Text="{Binding Path.Value}" Focusable="False" Foreground="White" />
+            <TextBlock Grid.Row="0" Text="{Binding FullPath.Value}" Focusable="False" Foreground="White" />
             <Border Grid.Row="0" Height="1" VerticalAlignment="Bottom" BorderBrush="Silver" BorderThickness="1"/>
 
             <ListBox Grid.Row="1" Name="FileListBox"
