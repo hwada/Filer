@@ -19,6 +19,7 @@ namespace Filer
     {
         private CompositeDisposable _disposables = new();
         private List<FileItemViewModel> _files = new();
+        private string _selectedItemName = ""; //TODO: もうちょっとスマートにできないか?
         private FileSystemWatcher _watcher = new(@"C:\");
 
         /// <summary>
@@ -86,10 +87,34 @@ namespace Filer
             _watcher.NotifyFilter = NotifyFilters.FileName | NotifyFilters.Size;
             _watcher.Created += OnDirectoryUpdated;
             _watcher.Changed += OnDirectoryUpdated;
+            _watcher.Renamed += OnDirectoryUpdated;
             _watcher.Deleted += OnDirectoryUpdated;
             _watcher.IncludeSubdirectories = false;
             _watcher.EnableRaisingEvents = true;
             _watcher.Filter = "*";
+
+            Files.CollectionChangedAsObservable().Subscribe(e =>
+            {
+                if (e.NewItems?.Count > 0)
+                {
+                    if (_selectedItemName.Length == 0 && SelectedItem.Value == null)
+                    {
+                        SelectedItem.Value = (FileItemViewModel)(e.NewItems[0]!);
+                    }
+                    else
+                    {
+                        foreach (FileItemViewModel item in e.NewItems)
+                        {
+                            if (item.Info.FullName == _selectedItemName)
+                            {
+                                _selectedItemName = "";
+                                SelectedItem.Value = item;
+                                break;
+                            }
+                        }
+                    }
+                }
+            });
         }
 
         /// <summary>
@@ -171,7 +196,31 @@ namespace Filer
                     CopyItems();
                     e.Handled = true;
                     break;
+                case Key.R:
+                    RenameItems();
+                    e.Handled = true;
+                    break;
             }
+        }
+
+        /// <summary>
+        /// マークしているアイテムをリネームする
+        /// </summary>
+        private void RenameItems()
+        {
+            var markItems = Files.Where(x => x.IsSelected.Value || x.IsMarked.Value).ToArray();
+            if (markItems.Length == 1)
+            {
+                var inputBox = new InputBox { Owner = App.Current.MainWindow, InputText = markItems[0].Name };
+                if (inputBox.ShowDialog() == true)
+                {
+                    var dstPath = Path.Combine(FullPath.Value, inputBox.InputText);
+                    _selectedItemName = dstPath;
+                    markItems[0].Rename(dstPath);
+                }
+
+            }
+            // TODO
         }
 
         /// <summary>
@@ -238,16 +287,7 @@ namespace Filer
                 HistoryRepository.Instance.Add(dir);
                 UpdateFooter();
 
-                var prev = Files.FirstOrDefault(x => x.Info.FullName == previousDir);
-                if (prev != null)
-                {
-                    SelectedItem.Value = prev;
-                }
-                else if (Files.Count > 0)
-                {
-                    SelectedItem.Value = Files.First();
-                }
-                SelectedIndex.Value = Files.IndexOf(SelectedItem.Value);
+                _selectedItemName = previousDir;
             }
             catch
             {
@@ -337,7 +377,6 @@ namespace Filer
         /// <param name="e">イベント引数</param>
         private void OnDirectoryUpdated(object sender, FileSystemEventArgs e)
         {
-            //App.Current.MainWindow.Dispatcher.BeginInvoke(() => UpdateItems(FullPath.Value));
             UpdateItems(FullPath.Value);
         }
     }

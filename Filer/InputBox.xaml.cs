@@ -31,7 +31,11 @@ namespace Filer
             TextBox.Focus();
         }
 
-        public string InputText => TextBox.Text;
+        public string InputText
+        {
+            get => TextBox.Text;
+            set => TextBox.Text = value;
+        }
 
         private void TextBox_PreviewKeyDown(object sender, KeyEventArgs e)
         {

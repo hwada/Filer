@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
 using System.Reactive.Disposables;
 using Prism.Mvvm;
@@ -84,6 +85,35 @@ namespace Filer
         public void Dispose()
         {
             _disposables.Dispose();
+        }
+
+        /// <summary>
+        /// アイテムをリネームする
+        /// </summary>
+        /// <param name="newName">新しい名前</param>
+        public void Rename(string newName)
+        {
+            try
+            {
+                if (newName.Length == 0)
+                {
+                    return;
+                }
+
+                if (Info is FileInfo fileInfo)
+                {
+                    fileInfo.MoveTo(newName);
+                }
+                else if (Info is DirectoryInfo dirInfo)
+                {
+                    dirInfo.MoveTo(newName);
+                }
+            }
+            catch (Exception e)
+            {
+                Debug.WriteLine(e);
+                throw;
+            }
         }
     }
 }

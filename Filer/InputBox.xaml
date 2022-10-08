@@ -6,7 +6,8 @@
         xmlns:local="clr-namespace:Filer"
         mc:Ignorable="d"
         WindowChrome.ResizeGripDirection="None"
-        Title="InputBox" Height="80" Width="500" ResizeMode="NoResize" ShowInTaskbar="False" WindowStartupLocation="CenterOwner">
+        WindowStyle="None"
+        Title="InputBox" Height="30" Width="500" ResizeMode="NoResize" ShowInTaskbar="False" WindowStartupLocation="CenterOwner">
     <Grid>
         <TextBox Name="TextBox" PreviewKeyDown="TextBox_PreviewKeyDown" />
     </Grid>
