@@ -15,23 +15,18 @@ using System.Windows.Shapes;
 namespace Filer
 {
     /// <summary>
-    /// HistoryWindow.xaml の相互作用ロジック
+    /// CommandWindow.xaml の相互作用ロジック
     /// </summary>
-    public partial class HistoryWindow : Window
+    public partial class CommandWindow : Window
     {
         /// <summary>
         /// コンストラクタ
         /// </summary>
-        public HistoryWindow()
+        public CommandWindow()
         {
             InitializeComponent();
             SearchBox.Focus();
         }
-
-        /// <summary>
-        /// このウィンドウのVM
-        /// </summary>
-        internal HistoryViewModel ViewModel => (HistoryViewModel)DataContext;
 
         /// <summary>
         /// 画面を閉じる

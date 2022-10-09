@@ -9,6 +9,7 @@ using System.Windows.Input;
 using Prism.Mvvm;
 using Reactive.Bindings.Extensions;
 using System.Windows.Threading;
+using System.Windows;
 
 namespace Filer
 {
@@ -204,6 +205,22 @@ namespace Filer
                     RenameItems();
                     e.Handled = true;
                     break;
+                case Key.H:
+                    {
+                        // 何か別のウィンドウ使う時のプラクティスがあったような
+                        var vm = new HistoryViewModel();
+                        var window = new CommandWindow()
+                        {
+                            Owner = App.Current.MainWindow,
+                            DataContext = vm
+                        };
+                        if (window.ShowDialog() == true)
+                        {
+                            MoveDirectory(vm.GetSelectedDirectory());
+                        }
+                    }
+                    e.Handled = true;
+                    break;
                 case Key.Q:
                     QuitApplication();
                     break;
@@ -329,7 +346,10 @@ namespace Filer
                 HistoryRepository.Instance.Add(dir);
                 UpdateFooter();
 
-                _selectedItemName = previousDir;
+                if (_files.Any(x => x.Info.FullName == previousDir))
+                {
+                    _selectedItemName = previousDir;
+                }
             }
             catch
             {

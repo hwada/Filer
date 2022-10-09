@@ -51,21 +51,6 @@ namespace Filer
 
             switch (e.Key)
             {
-                case Key.H:
-                    {
-                        // 何か別のウィンドウ使う時のプラクティスがあったような
-                        var window = new HistoryWindow() { Owner = Window.GetWindow(this) };
-                        if (window.ShowDialog() == true)
-                        {
-                            var dir = window.ViewModel.GetSelectedDirectory();
-                            if (Directory.Exists(dir))
-                            {
-                                ViewModel.MoveDirectory(dir);
-                            }
-                        }
-                    }
-                    e.Handled = true;
-                    return;
                 case Key.Escape:
                     ViewModel.IsSearchMode.Value = false;
                     ViewModel.SearchText.Value = "";

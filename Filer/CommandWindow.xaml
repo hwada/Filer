@@ -1,4 +1,4 @@
-﻿<Window x:Class="Filer.HistoryWindow"
+﻿<Window x:Class="Filer.CommandWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -10,10 +10,6 @@
         WindowStyle="None"
         Title="History" Height="450" Width="400">
 
-    <Window.DataContext>
-        <local:HistoryViewModel/>
-    </Window.DataContext>
-    
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -42,7 +38,7 @@
                  VirtualizingPanel.IsVirtualizing="True"
                  VirtualizingPanel.VirtualizationMode="Recycling"
                  VirtualizingPanel.ScrollUnit="Pixel"
-                 ItemsSource="{Binding Directories, Mode=OneWay}"
+                 ItemsSource="{Binding Commands, Mode=OneWay}"
                  HorizontalContentAlignment="Stretch"
                  SelectionMode="Single"
                  SelectedIndex="{Binding SelectedIndex.Value}">
