@@ -158,17 +158,11 @@ namespace Filer
                     }
                     break;
                 case Key.Up:
-                    if (SelectedIndex.Value > 0)
-                    {
-                        SelectedIndex.Value -= 1;
-                    }
+                    OffsetSelect(-1);
                     e.Handled = true;
                     break;
                 case Key.Down:
-                    if (SelectedIndex.Value < Files.Count - 1)
-                    {
-                        SelectedIndex.Value += 1;
-                    }
+                    OffsetSelect(+1);
                     e.Handled = true;
                     break;
                 case Key.Space:
@@ -176,10 +170,7 @@ namespace Filer
                     {
                         SelectedItem.Value.IsMarked.Value = !SelectedItem.Value.IsMarked.Value;
                     }
-                    if (SelectedIndex.Value < Files.Count - 1)
-                    {
-                        SelectedIndex.Value += 1;
-                    }
+                    OffsetSelect(+1);
                     e.Handled = true;
                     break;
                 case Key.A:
@@ -224,6 +215,19 @@ namespace Filer
                 case Key.Q:
                     QuitApplication();
                     break;
+            }
+        }
+
+        /// <summary>
+        /// 選択行を移動する
+        /// </summary>
+        /// <param name="offset">移動量</param>
+        private void OffsetSelect(int offset)
+        {
+            var next = SelectedIndex.Value + offset;
+            if (next >= 0 && next < Files.Count)
+            {
+                SelectedIndex.Value = next;
             }
         }
 
