@@ -27,30 +27,27 @@ namespace Filer
             return $"{size}B";
         }
 
-        public static void CopyDirectory(string sourceDir, string destinationDir, bool recursive)
+        public static void CopyDirectory(string source, string destination)
         {
-            var dir = new DirectoryInfo(sourceDir);
+            var dir = new DirectoryInfo(source);
 
             if (!dir.Exists)
             {
                 throw new DirectoryNotFoundException($"Source directory not found: {dir.FullName}");
             }
 
-            Directory.CreateDirectory(destinationDir);
+            Directory.CreateDirectory(destination);
             foreach (FileInfo file in dir.GetFiles())
             {
-                string targetFilePath = Path.Combine(destinationDir, file.Name);
+                string targetFilePath = Path.Combine(destination, file.Name);
                 CopyFile(file.FullName, targetFilePath);
             }
 
-            if (recursive)
+            var dirs = dir.GetDirectories();
+            foreach (DirectoryInfo subDir in dirs)
             {
-                var dirs = dir.GetDirectories();
-                foreach (DirectoryInfo subDir in dirs)
-                {
-                    string newDestinationDir = Path.Combine(destinationDir, subDir.Name);
-                    CopyDirectory(subDir.FullName, newDestinationDir, true);
-                }
+                string newDestinationDir = Path.Combine(destination, subDir.Name);
+                CopyDirectory(subDir.FullName, newDestinationDir);
             }
         }
 
@@ -63,6 +60,28 @@ namespace Filer
             }
 
             File.Copy(source, destination, true);
+        }
+
+        public static void MoveDirectory(string source, string destination)
+        {
+            //TODO: 上書き確認
+            if (Directory.Exists(destination))
+            {
+                return;
+            }
+
+            Directory.Move(source, destination);
+        }
+
+        public static void MoveFile(string source, string destination)
+        {
+            //TODO: 上書き確認
+            if (File.Exists(destination))
+            {
+                return;
+            }
+
+            File.Move(source, destination, true);
         }
     }
 }

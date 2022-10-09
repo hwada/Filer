@@ -196,11 +196,26 @@ namespace Filer
                     CopyItems();
                     e.Handled = true;
                     break;
+                case Key.M:
+                    MoveItems();
+                    e.Handled = true;
+                    break;
                 case Key.R:
                     RenameItems();
                     e.Handled = true;
                     break;
+                case Key.Q:
+                    QuitApplication();
+                    break;
             }
+        }
+
+        /// <summary>
+        /// アプリを終了する
+        /// </summary>
+        private void QuitApplication()
+        {
+            App.Current.MainWindow.Close();
         }
 
         /// <summary>
@@ -235,6 +250,17 @@ namespace Filer
         }
 
         /// <summary>
+        /// 隣接ペインに選択したアイテムを移動する
+        /// </summary>
+        private void MoveItems()
+        {
+            foreach (var item in Files.Where(x => x.IsMarked.Value))
+            {
+                NextPane.MoveFrom(item);
+            }
+        }
+
+        /// <summary>
         /// 現在のディレクトリにitemをコピーします
         /// </summary>
         /// <param name="item">コピー元のアイテム</param>
@@ -246,7 +272,23 @@ namespace Filer
             }
             else if (item.Info is DirectoryInfo directoryInfo)
             {
-                Util.CopyDirectory(directoryInfo.FullName, FullPath.Value, true);
+                Util.CopyDirectory(directoryInfo.FullName, FullPath.Value);
+            }
+        }
+
+        /// <summary>
+        /// 現在のディレクトリにitemを移動します
+        /// </summary>
+        /// <param name="item">移動するのアイテム</param>
+        public void MoveFrom(FileItemViewModel item)
+        {
+            if (item.Info is FileInfo fileInfo)
+            {
+                Util.MoveFile(fileInfo.FullName, Path.Combine(FullPath.Value, fileInfo.Name));
+            }
+            else if (item.Info is DirectoryInfo directoryInfo)
+            {
+                Util.MoveDirectory(directoryInfo.FullName, FullPath.Value);
             }
         }
 
