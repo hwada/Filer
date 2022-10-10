@@ -1,4 +1,5 @@
-﻿using Prism.Mvvm;
+﻿using Filer.Repositories;
+using Prism.Mvvm;
 using Reactive.Bindings;
 using Reactive.Bindings.Extensions;
 using System;
@@ -6,6 +7,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reactive.Disposables;
+using System.Reactive.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -14,14 +16,15 @@ namespace Filer
     /// <summary>
     /// コマンドパレットのVM
     /// </summary>
-    internal abstract class CommandPaletteViewModel : BindableBase, IDisposable
+    internal class CommandPaletteViewModel : BindableBase, IDisposable
     {
         private CompositeDisposable _disposables = new();
+        private IniRepository _repository;
 
         /// <summary>
         /// コマンド(選択肢)の一覧
         /// </summary>
-        public ReactiveCollection<FileItemViewModel> Commands { get; set; } = new();
+        public ReactiveCollection<string> Commands { get; set; } = new();
 
         /// <summary>
         /// 選択中の行
@@ -46,8 +49,10 @@ namespace Filer
         /// <summary>
         /// コンストラクタ
         /// </summary>
-        public CommandPaletteViewModel()
+        public CommandPaletteViewModel(IniRepository repository)
         {
+            _repository = repository;
+
             Commands.AddTo(_disposables);
             SelectedIndex.AddTo(_disposables);
             MoveUpCommand.Subscribe(OnMoveUp).AddTo(_disposables);
@@ -64,12 +69,12 @@ namespace Filer
         }
 
         /// <summary>
-        /// 選択中のディレクトリを取得する
+        /// 選択中の文字列を取得する
         /// </summary>
         /// <returns></returns>
-        public string GetSelectedDirectory()
+        public string GetSelectedCommandItem()
         {
-            return SelectedIndex.Value < 0 ? "" : Commands[SelectedIndex.Value].Info.FullName;
+            return SelectedIndex.Value < 0 ? SearchText.Value : Commands[SelectedIndex.Value];
         }
 
         /// <summary>
@@ -98,6 +103,20 @@ namespace Filer
         /// コマンドを検索、絞り込む
         /// </summary>
         /// <param name="text">検索文字列</param>
-        protected abstract void CommandSearch(string text);
+        private void CommandSearch(string text)
+        {
+            // ファジィ検索にしたいけど、ファイラならこれで十分かも
+            // TODO: migemo対応
+            Commands.Clear();
+            foreach (var item in _repository.Items.Where(x => x.Contains(text)))
+            {
+                Commands.Add(item);
+            }
+
+            if (Commands.Count > 0)
+            {
+                SelectedIndex.Value = 0;
+            }
+        }
     }
 }

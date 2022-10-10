@@ -44,7 +44,7 @@
                  SelectedIndex="{Binding SelectedIndex.Value}">
             <ListBox.ItemTemplate>
                 <DataTemplate DataType="local:FileItemViewModel">
-                    <TextBlock Text="{Binding Info.FullName}" TextTrimming="CharacterEllipsis"/>
+                    <TextBlock Text="{Binding}" TextTrimming="CharacterEllipsis"/>
                 </DataTemplate>
             </ListBox.ItemTemplate>
         </ListBox>

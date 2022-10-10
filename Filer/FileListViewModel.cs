@@ -10,6 +10,8 @@ using Prism.Mvvm;
 using Reactive.Bindings.Extensions;
 using System.Windows.Threading;
 using System.Windows;
+using Filer.Repositories;
+using System.Diagnostics;
 
 namespace Filer
 {
@@ -197,24 +199,67 @@ namespace Filer
                     e.Handled = true;
                     break;
                 case Key.H:
-                    {
-                        // 何か別のウィンドウ使う時のプラクティスがあったような
-                        var vm = new HistoryViewModel();
-                        var window = new CommandWindow()
-                        {
-                            Owner = App.Current.MainWindow,
-                            DataContext = vm
-                        };
-                        if (window.ShowDialog() == true)
-                        {
-                            MoveDirectory(vm.GetSelectedDirectory());
-                        }
-                    }
+                    ShowHistoryPalette();
+                    e.Handled = true;
+                    break;
+                case Key.F1:
+                    ShowCommandPalette();
                     e.Handled = true;
                     break;
                 case Key.Q:
                     QuitApplication();
+                    e.Handled = true;
                     break;
+            }
+        }
+
+        /// <summary>
+        /// 履歴ウィンドウを表示
+        /// </summary>
+        private void ShowHistoryPalette()
+        {
+            // 何か別のウィンドウ使う時のプラクティスがあったような
+            var vm = new CommandPaletteViewModel(HistoryRepository.Instance);
+            var window = new CommandWindow()
+            {
+                Owner = App.Current.MainWindow,
+                DataContext = vm
+            };
+            if (window.ShowDialog() == true)
+            {
+                MoveDirectory(vm.GetSelectedCommandItem());
+            }
+        }
+
+        /// <summary>
+        /// コマンドパレットを表示する
+        /// </summary>
+        private void ShowCommandPalette()
+        {
+            try
+            {
+                var vm = new CommandPaletteViewModel(CommandRepository.Instance);
+                var window = new CommandWindow()
+                {
+                    Owner = App.Current.MainWindow,
+                    DataContext = vm
+                };
+                if (window.ShowDialog() == true)
+                {
+                    var command = vm.GetSelectedCommandItem();
+                    var path = SelectedItem.Value.Info.FullName ?? FullPath.Value;
+                    Process.Start(new ProcessStartInfo(command, path)
+                    {
+                        UseShellExecute = true,
+                        CreateNoWindow = true,
+                        WorkingDirectory = FullPath.Value,
+                    });
+                    CommandRepository.Instance.Add(command);
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex);
             }
         }
 

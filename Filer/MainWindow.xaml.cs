@@ -1,4 +1,5 @@
-﻿using Microsoft.Xaml.Behaviors.Media;
+﻿using Filer.Repositories;
+using Microsoft.Xaml.Behaviors.Media;
 using Reactive.Bindings.Extensions;
 using System;
 using System.IO;
@@ -92,6 +93,7 @@ namespace Filer
         private void Window_Closed(object sender, EventArgs e)
         {
             HistoryRepository.Instance.Save();
+            CommandRepository.Instance.Save();
 
             Settings.Default.WindowLeft = (int)Left;
             Settings.Default.WindowTop = (int)Top;
