@@ -247,7 +247,7 @@ namespace Filer
                 if (window.ShowDialog() == true)
                 {
                     var command = vm.GetSelectedCommandItem();
-                    var path = SelectedItem.Value.Info.FullName ?? FullPath.Value;
+                    var path = SelectedItem.Value?.Info?.FullName ?? FullPath.Value;
                     Process.Start(new ProcessStartInfo(command, path)
                     {
                         UseShellExecute = true,
