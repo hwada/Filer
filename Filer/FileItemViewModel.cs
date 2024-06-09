@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Diagnostics;
 using System.IO;
-using System.Reactive.Disposables;
 using Prism.Mvvm;
-using Reactive.Bindings;
-using Reactive.Bindings.Extensions;
+using R3;
 
 namespace Filer
 {
@@ -49,12 +47,12 @@ namespace Filer
         /// <summary>
         /// ファイルが選択中?
         /// </summary>
-        public ReactiveProperty<bool> IsSelected { get; set; } = new(false);
+        public BindableReactiveProperty<bool> IsSelected { get; private set; } = new(false);
 
         /// <summary>
-        /// ファイルにマーキングされている?
+        /// ファイルがマーキングされている?
         /// </summary>
-        public ReactiveProperty<bool> IsMarked { get; set; } = new(false);
+        public BindableReactiveProperty<bool> IsMarked { get; private set; } = new(false);
 
         /// <summary>
         /// 親ディレクトリへの参照?

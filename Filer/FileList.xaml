@@ -16,8 +16,7 @@
         <converter:VisibilityConverter x:Key="VisiblityConverter" />
     </UserControl.Resources>
 
-    <Border BorderBrush="Silver" BorderThickness="1"
-            Background="Black">
+    <Border BorderBrush="Silver" BorderThickness="1" Background="Black">
         <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
@@ -41,7 +40,6 @@
                      HorizontalContentAlignment="Stretch"
                      SelectionMode="Single"
                      SelectedItem="{Binding SelectedItem.Value, Mode=TwoWay}"
-                     SelectedIndex="{Binding SelectedIndex.Value, Mode=TwoWay}"
                      GotFocus="FileListBox_GotFocus"
                      PreviewKeyDown="ListBox_KeyDown">
                 <ListBox.ItemContainerStyle>
@@ -63,22 +61,21 @@
                                         </Grid.Style>
                                         
                                         <ContentPresenter />
-                                        <Border VerticalAlignment="Bottom"
-                                            BorderBrush="Blue" Height="2" BorderThickness="2">
+                                        <Border VerticalAlignment="Bottom" BorderBrush="Blue" Height="2" BorderThickness="2">
                                             <Border.Style>
                                                 <Style TargetType="Border">
                                                     <Style.Triggers>
                                                         <MultiDataTrigger>
                                                             <MultiDataTrigger.Conditions>
                                                                 <Condition Binding="{Binding Path=ViewModel.IsActive.Value, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type local:FileList}}}" Value="True" />
-                                                                <Condition Binding="{Binding Path=IsSelected, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type ListBoxItem}}}" Value="True" />
+                                                                <Condition Binding="{Binding Path=IsSelected.Value}" Value="True" />
                                                             </MultiDataTrigger.Conditions>
                                                             <Setter Property="Visibility" Value="Visible"/>
                                                         </MultiDataTrigger>
                                                         <DataTrigger Binding="{Binding Path=ViewModel.IsActive.Value, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type local:FileList}}}" Value="False">
                                                             <Setter Property="Visibility" Value="Collapsed"/>
                                                         </DataTrigger>
-                                                        <DataTrigger Binding="{Binding Path=IsSelected, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type ListBoxItem}}}" Value="False">
+                                                        <DataTrigger Binding="{Binding Path=IsSelected.Value}" Value="False">
                                                             <Setter Property="Visibility" Value="Collapsed"/>
                                                         </DataTrigger>
                                                     </Style.Triggers>

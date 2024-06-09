@@ -15,7 +15,7 @@ namespace Filer.Repositories
     /// </summary>
     internal class CommandRepository : IniRepository
     {
-        private static CommandRepository _instance;
+        private static CommandRepository? _instance;
 
         /// <summary>
         /// Singletonインスタンスを取得する

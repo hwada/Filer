@@ -15,7 +15,7 @@ namespace Filer.Repositories
     /// </summary>
     internal class HistoryRepository : IniRepository
     {
-        private static HistoryRepository _instance;
+        private static HistoryRepository? _instance;
 
         /// <summary>
         /// Singletonインスタンスを取得する

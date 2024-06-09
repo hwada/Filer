@@ -1,15 +1,9 @@
 ﻿using Filer.Repositories;
+using ObservableCollections;
 using Prism.Mvvm;
-using Reactive.Bindings;
-using Reactive.Bindings.Extensions;
+using R3;
 using System;
-using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Reactive.Disposables;
-using System.Reactive.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Filer
 {
@@ -24,7 +18,7 @@ namespace Filer
         /// <summary>
         /// コマンド(選択肢)の一覧
         /// </summary>
-        public ReactiveCollection<string> Commands { get; set; } = new();
+        public ObservableList<string> Commands { get; set; } = new();
 
         /// <summary>
         /// 選択中の行
@@ -34,12 +28,12 @@ namespace Filer
         /// <summary>
         /// 1行上に移動
         /// </summary>
-        public ReactiveCommand MoveUpCommand { get; set; } = new();
+        public ReactiveCommand<Unit> MoveUpCommand { get; set; } = new();
 
         /// <summary>
         /// 1行下に移動
         /// </summary>
-        public ReactiveCommand MoveDownCommand { get; set; } = new();
+        public ReactiveCommand<Unit> MoveDownCommand { get; set; } = new();
 
         /// <summary>
         /// 検索文字列
@@ -53,10 +47,9 @@ namespace Filer
         {
             _repository = repository;
 
-            Commands.AddTo(_disposables);
             SelectedIndex.AddTo(_disposables);
-            MoveUpCommand.Subscribe(OnMoveUp).AddTo(_disposables);
-            MoveDownCommand.Subscribe(OnMoveDown).AddTo(_disposables);
+            MoveUpCommand.Subscribe(_ => OnMoveUp()).AddTo(_disposables);
+            MoveDownCommand.Subscribe(_ => OnMoveDown()).AddTo(_disposables);
             SearchText.Subscribe(CommandSearch).AddTo(_disposables);
         }
 

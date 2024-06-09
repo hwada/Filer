@@ -1,12 +1,9 @@
 ﻿using Filer.Repositories;
-using Microsoft.Xaml.Behaviors.Media;
-using Reactive.Bindings.Extensions;
 using System;
 using System.IO;
-using System.Reactive.Disposables;
-using System.Reactive.Linq;
 using System.Windows;
 using System.Windows.Input;
+using R3;
 
 namespace Filer
 {

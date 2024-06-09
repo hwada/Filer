@@ -1,17 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Reactive.Bindings;
-using System.Reactive.Linq;
 using System.IO;
-using System.Reactive.Disposables;
 using System.Windows.Input;
 using Prism.Mvvm;
-using Reactive.Bindings.Extensions;
 using System.Windows.Threading;
 using System.Windows;
 using Filer.Repositories;
 using System.Diagnostics;
+using R3;
+using ObservableCollections;
+using System.Windows.Data;
 
 namespace Filer
 {
@@ -21,70 +20,63 @@ namespace Filer
     public class FileListViewModel : BindableBase, IDisposable
     {
         private CompositeDisposable _disposables = new();
-        private List<FileItemViewModel> _files = new();
+        private List<FileItemViewModel> _sourceFiles = new();
+        private ObservableList<FileItemViewModel> _files = new();
         private string _selectedItemName = ""; //TODO: もうちょっとスマートにできないか?
         private FileSystemWatcher _watcher = new(@"C:\");
 
         /// <summary>
         /// 隣のペイン
         /// </summary>
-        public FileListViewModel NextPane { get; set; }
+        public FileListViewModel? NextPane { get; set; }
 
         /// <summary>
         /// 現在位置
         /// </summary>
-        public ReactiveProperty<string> FullPath { get; set; } = new("");
+        public BindableReactiveProperty<string> FullPath { get; private set; } = new("");
 
         /// <summary>
         /// このペインのステータス
         /// </summary>
-        public ReactiveProperty<string> Footer { get; set; } = new("");
+        public BindableReactiveProperty<string> Footer { get; private set; } = new("");
 
         /// <summary>
         /// このペインがフォーカスを持っているかどうか
         /// </summary>
-        public ReactiveProperty<bool> IsActive { get; set; } = new(false);
+        public BindableReactiveProperty<bool> IsActive { get; private set; } = new(false);
 
         /// <summary>
         /// 現在のディレクトリ下にあるディレクトリとファイルのリスト
         /// </summary>
-        public ReactiveCollection<FileItemViewModel> Files { get; set; } = new();
+        public INotifyCollectionChangedSynchronizedView<FileItemViewModel> Files { get; private set; }
 
         /// <summary>
         /// 選択中のオブジェクト
         /// </summary>
-        public ReactiveProperty<FileItemViewModel> SelectedItem { get; set; } = new();
-
-        /// <summary>
-        /// 選択行
-        /// </summary>
-        public ReactiveProperty<int> SelectedIndex { get; set; } = new(-1);
+        public BindableReactiveProperty<FileItemViewModel> SelectedItem { get; private set; } = new();
 
         /// <summary>
         /// 検索モードかどうか
         /// </summary>
-        public ReactiveProperty<bool> IsSearchMode { get; set; } = new(false);
+        public BindableReactiveProperty<bool> IsSearchMode { get; private set; } = new(false);
 
         /// <summary>
         /// 検索文字列
         /// </summary>
-        public ReactiveProperty<string> SearchText { get; set; } = new("");
+        public BindableReactiveProperty<string> SearchText { get; private set; } = new("");
 
         /// <summary>
         /// コンストラクタ
         /// </summary>
-#pragma warning disable CS8618 // null 非許容のフィールドには、コンストラクターの終了時に null 以外の値が入っていなければなりません。Null 許容として宣言することをご検討ください。
         public FileListViewModel()
-#pragma warning restore CS8618 // null 非許容のフィールドには、コンストラクターの終了時に null 以外の値が入っていなければなりません。Null 許容として宣言することをご検討ください。
         {
-            Files.AddTo(_disposables);
             SelectedItem.AddTo(_disposables);
             IsSearchMode.AddTo(_disposables);
             SearchText.Subscribe(OnSearchText).AddTo(_disposables);
 
-            IsActive.Where(x => x).Subscribe(_ =>
+            IsActive.Where(x => x).Subscribe(active =>
             {
-                NextPane.IsActive.Value = false;
+                NextPane!.IsActive.Value = false;
             }).AddTo(_disposables);
 
             _watcher.NotifyFilter = NotifyFilters.FileName | NotifyFilters.Size;
@@ -96,28 +88,24 @@ namespace Filer
             _watcher.EnableRaisingEvents = true;
             _watcher.Filter = "*";
 
-            Files.CollectionChangedAsObservable().Subscribe(e =>
+            _files.ObserveAdd().Subscribe(item =>
             {
-                if (e.NewItems?.Count > 0)
+                if (_selectedItemName.Length == 0 && SelectedItem.Value == null)
                 {
-                    if (_selectedItemName.Length == 0 && SelectedItem.Value == null)
+                    SelectedItem.Value = item.Value;
+                }
+                else
+                {
+                    if (item.Value.Info.FullName == _selectedItemName)
                     {
-                        SelectedItem.Value = (FileItemViewModel)(e.NewItems[0]!);
-                    }
-                    else
-                    {
-                        foreach (FileItemViewModel item in e.NewItems)
-                        {
-                            if (item.Info.FullName == _selectedItemName)
-                            {
-                                _selectedItemName = "";
-                                SelectedItem.Value = item;
-                                break;
-                            }
-                        }
+                        _selectedItemName = "";
+                        SelectedItem.Value = item.Value;
                     }
                 }
             });
+            Files = _files.CreateView(x => x).ToNotifyCollectionChanged();
+            BindingOperations.EnableCollectionSynchronization(Files, new object());
+            Files.AddTo(_disposables);
         }
 
         /// <summary>
@@ -125,7 +113,7 @@ namespace Filer
         /// </summary>
         public void Dispose()
         {
-            foreach (var item in _files)
+            foreach (var item in _sourceFiles)
             {
                 item.Dispose();
             }
@@ -183,7 +171,7 @@ namespace Filer
                     e.Handled = true;
                     break;
                 case Key.O:
-                    MoveDirectory(NextPane.FullPath.Value);
+                    MoveDirectory(NextPane!.FullPath.Value);
                     e.Handled = true;
                     break;
                 case Key.C:
@@ -269,10 +257,10 @@ namespace Filer
         /// <param name="offset">移動量</param>
         private void OffsetSelect(int offset)
         {
-            var next = SelectedIndex.Value + offset;
-            if (next >= 0 && next < Files.Count)
+            var next = _files.IndexOf(SelectedItem.Value) + offset;
+            if (next >= 0 && next < _files.Count)
             {
-                SelectedIndex.Value = next;
+                SelectedItem.Value = _files[next];
             }
         }
 
@@ -311,7 +299,7 @@ namespace Filer
         {
             foreach (var item in Files.Where(x => x.IsMarked.Value))
             {
-                NextPane.CopyFrom(item);
+                NextPane!.CopyFrom(item);
             }
         }
 
@@ -322,7 +310,7 @@ namespace Filer
         {
             foreach (var item in Files.Where(x => x.IsMarked.Value))
             {
-                NextPane.MoveFrom(item);
+                NextPane!.MoveFrom(item);
             }
         }
 
@@ -395,7 +383,7 @@ namespace Filer
                 HistoryRepository.Instance.Add(dir);
                 UpdateFooter();
 
-                if (_files.Any(x => x.Info.FullName == previousDir))
+                if (_sourceFiles.Any(x => x.Info.FullName == previousDir))
                 {
                     _selectedItemName = previousDir;
                 }
@@ -431,8 +419,8 @@ namespace Filer
             {
                 item.Dispose();
             }
-            Files.ClearOnScheduler();
-            Files.AddRangeOnScheduler(children);
+            _files.Clear();
+            _files.AddRange(children);
             ResetItems(children);
         }
 
@@ -442,13 +430,13 @@ namespace Filer
         /// <param name="items">新しいディレクトリのファイルリスト</param>
         private void ResetItems(List<FileItemViewModel> items)
         {
-            foreach (var item in _files)
+            foreach (var item in _sourceFiles)
             {
                 item.Dispose();
             }
 
-            _files.Clear();
-            _files.AddRange(items);
+            _sourceFiles.Clear();
+            _sourceFiles.AddRange(items);
         }
 
         /// <summary>
@@ -474,10 +462,10 @@ namespace Filer
         private void OnSearchText(string text)
         {
             var words = text.Split(" ").Where(x => x.Length > 0).Select(x => x.ToLower()).ToArray();
-            Files.Clear();
-            foreach (var item in _files.Where(x => words.All(w => x.Name.ToLower().Contains(w))))
+            _files.Clear();
+            foreach (var item in _sourceFiles.Where(x => words.All(w => x.Name.ToLower().Contains(w))))
             {
-                Files.Add(item);
+                _files.Add(item);
             }
         }
 
